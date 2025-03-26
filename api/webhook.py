@@ -12,9 +12,9 @@ BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = AsyncTeleBot(BOT_TOKEN)
 
 firebase_config = json.loads(os.environ.get('FIREBASE_SERVICE_ACCOUNT'))
-cred = credentilas.certificate(firebase_config)
+cred = credentilas.Certificate(firebase_config)
 firebase_admin.initialize_app(cred, {'storageBucket': 'nillcoin-tg-game.appspot.com'})
-db = firebase.client()
+db = firestore.client()
 bucket = storage.bucket()
 
 def generate_start_keyboard():
@@ -71,11 +71,11 @@ async def start(message):
                 'languageCode': user_language_code,
                 'isPremium': is_premium,
                 'refrrals': {},
-                'nillcoins': 0,
+                'balance': 0,
                 'level': 1,
                 'mineRate': 0.001,
                 'isMining': False,
-                'miningStartTime': None,
+                'miningStartedTime': None,
                 'daily': {
                     'claimedTime': None,
                     'claimedDay': 0,
@@ -95,7 +95,7 @@ async def start(message):
 
                     bonus_amount = 500 if is_premium else 100
 
-                    current_balance = referrer_data.get('nillcoins', 0)
+                    current_balance = referrer_data.get('balance', 0)
                     new_balance = current_balance + bonus_amount
                  
                     referreals = referrer_data.get('referrals', {})
@@ -109,7 +109,7 @@ async def start(message):
                     }
 
                     referrer_ref.update({
-                        'nillcoins': new_balance,
+                        'balance': new_balance,
                         'referrals': referreals,
                     })
                 else: 
