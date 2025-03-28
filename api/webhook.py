@@ -3,7 +3,8 @@ import os
 import json
 import asyncio
 import requests
-from telebot.asyncio_telebot import asyncio_telebot
+import datetime
+from telebot.asyncio_telebot import asyncioTelebot
 from firebase_admin import credentials, firestore, storage
 from telebotot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
@@ -12,14 +13,14 @@ BOT_TOKEN = os.environ.get('BOT_TOKEN')
 bot = AsyncTeleBot(BOT_TOKEN)
 
 firebase_config = json.loads(os.environ.get('FIREBASE_SERVICE_ACCOUNT'))
-cred = credentilas.Certificate(firebase_config)
+cred = credentials.Certificate(firebase_config)
 firebase_admin.initialize_app(cred, {'storageBucket': 'nillcoin-tg-game.appspot.com'})
 db = firestore.client()
 bucket = storage.bucket()
 
 def generate_start_keyboard():
-    keyboard = inilineKeyboardMarkup()
-    keyboard.add(inilineKeyboardButton('Open Nillcoin App', web_app=WebAppInfo(url='https://nillcoinfrontend.netlify.app/')))
+    keyboard = InlineKeyboardMarkup()
+    keyboard.add(InlineKeyboardButton('Open Nillcoin App', web_app=WebAppInfo(url='https://nillcoinfrontend.netlify.app/')))
     return keyboard
 
 
@@ -29,7 +30,7 @@ async def start(message):
     user_first_name = str(message.from_user.first_name)
     user_last_name = str(message.from_user.last_name)
     user_username = str(message.from_user.username)
-    user_lansguage_code = str(message.from_user.language_code)
+    user_language_code = str(message.from_user.language_code)
     is_premium = message.from_user.is_premium
     text = message.text.split()
     welcome_message = (
@@ -41,10 +42,10 @@ async def start(message):
     )
 
     try :
-        user.ref = db.collection('users').document(user_id)
+        user_ref = db.collection('users').document(user_id)
         user_doc = user_ref.get()
 
-        if not user_doc.exsts:
+        if not user_doc.exists:
             photos = await bot.get_user_profile_photos(user_id, limit=1)
             if photos.total_count > 0:
                 file_id = photos.photos[0][-1].file_id
@@ -98,10 +99,10 @@ async def start(message):
                     current_balance = referrer_data.get('balance', 0)
                     new_balance = current_balance + bonus_amount
                  
-                    referreals = referrer_data.get('referrals', {})
-                    if  referreals is None:
-                        referreals = {}
-                    referreals[user_id] = {
+                    referrals = referrer_data.get('referrals', {})
+                    if  referrals is None:
+                        referrals = {}
+                    referrals[user_id] = {
                         'addedValue': bonus_amount,
                         'firstName': user_first_name,
                         'lastName': user_last_name,
@@ -110,7 +111,7 @@ async def start(message):
 
                     referrer_ref.update({
                         'balance': new_balance,
-                        'referrals': referreals,
+                        'referrals': referrals,
                     })
                 else: 
                     user_data['referredBy'] = None
@@ -144,5 +145,5 @@ class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('Bot is running'.encode())
+        self.wfile.write('Bot is running'.encode('utf-8'))
                 
