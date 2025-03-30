@@ -4,9 +4,10 @@ import json
 import asyncio
 import requests
 import datetime
-from telebot.asyncio_telebot import asyncioTelebot
+from telebot.asyncio_telebot import AsyncTeleBot
+import firebase_admin
 from firebase_admin import credentials, firestore, storage
-from telebotot import types
+from telebot import types
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
@@ -51,7 +52,7 @@ async def start(message):
                 file_id = photos.photos[0][-1].file_id
                 file_info = await bot.get_file(file_id)
                 file_path = file_info.file_path
-                file_url = f'https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}'
+                file_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}"
 
                 response = requests.get(file_url)
                 if response.status_code == 200:
@@ -140,10 +141,10 @@ class handler(BaseHTTPRequestHandler):
 
     async def process_update(self, update_dict):
         update = types.Update.de_json(update_dict)
-        await bot.process_new_update(update)
+        await bot.process_new_updates([update])
 
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write('Bot is running'.encode('utf-8'))
+        self.wfile.write('Bot is running'.encode())
                 
