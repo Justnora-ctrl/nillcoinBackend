@@ -26,11 +26,12 @@ def generate_start_keyboard():
 
 
 @bot.message_handler(commands=['start'])
+
 async def start(message):
     user_id = str(message.from_user.id)
     user_first_name = str(message.from_user.first_name)
-    user_last_name = str(message.from_user.last_name)
-    user_username = str(message.from_user.username)
+    user_last_name = message.from_user.last_name
+    user_username = message.from_user.username
     user_language_code = str(message.from_user.language_code)
     is_premium = message.from_user.is_premium
     text = message.text.split()
@@ -72,7 +73,7 @@ async def start(message):
                 'username': user_username,
                 'languageCode': user_language_code,
                 'isPremium': is_premium,
-                'refrrals': {},
+                'referrals': {},
                 'balance': 0,
                 'level': 1,
                 'mineRate': 0.001,
@@ -134,7 +135,8 @@ class handler(BaseHTTPRequestHandler):
         post_data = self.rfile.read(content_length)
         update_dict = json.loads(post_data.decode('utf-8'))
 
-        asyncio.run(self.process_update(update_dict))
+        # asyncio.run(self.process_update(update_dict))
+        asyncio.ensure_future(self.process_update(update_dict))
 
         self.send_response(200)
         self.end_headers()
